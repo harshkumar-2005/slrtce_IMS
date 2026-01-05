@@ -8,7 +8,7 @@ export const verifyToken = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_change_this_in_production');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
         req.userId = decoded.id;
         req.userRole = decoded.role;
         next();
