@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  STAFF
+}
+
+enum Branch {
+  CSE
+  ECS
+  ECE
+  MECH
+  CIVIL
+  EEE
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  name     String
+  phone    String @unique
+  uid      String @unique
+  branch   Branch
+
+  role Role @default(STUDENT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+}
+
+model StudentProfile {
+  id Int @id @default(autoincrement())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  rollNo     String @unique
+  department String
+  semester   Int
+
+  createdAt DateTime @default(now())
+}
+
+model TeacherProfile {
+  id Int @id @default(autoincrement())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  department  String
+  designation String?
+
+  createdAt DateTime @default(now())
+}
