@@ -7,6 +7,10 @@ datasource db {
   provider = "mysql"
 }
 
+//
+// ENUMS
+//
+
 enum Role {
   ADMIN
   TEACHER
@@ -23,6 +27,20 @@ enum Branch {
   EEE
 }
 
+enum Department {
+  COMPUTER_SCIENCE
+  ELECTRONICS
+  MECHANICAL
+  CIVIL
+  ELECTRICAL
+  SCIENCE
+  ADMINISTRATION
+}
+
+//
+// MODELS
+//
+
 model User {
   id       String @id @default(uuid())
   email    String @unique
@@ -37,6 +55,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relations
+  refreshTokens  RefreshToken[]
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
 }
@@ -47,11 +67,13 @@ model StudentProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
-  rollNo     String @unique
-  department String
+  rollNo     String     @unique
+  department Department
   semester   Int
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model TeacherProfile {
@@ -60,8 +82,22 @@ model TeacherProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
-  department  String
+  department  Department
   designation String?
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
