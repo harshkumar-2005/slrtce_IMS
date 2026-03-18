@@ -95,6 +95,7 @@ model StudentProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  uid        String     @unique @db.VarChar(50)
   rollNo     String     @unique
   branch     Branch
   department Department
