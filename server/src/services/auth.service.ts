@@ -3,8 +3,7 @@ import jsonwebtoken from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import { AuthRequest } from "../types/auth.types.js";
 import { Response } from "express";
-import { PrismaClient } from "../generated/prisma/index.js";
-import { rootCertificates } from "node:tls";
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const loginService = async (validUser: { email: string; password: string }, req: AuthRequest) => {

@@ -14,7 +14,7 @@ import {
   PrismaClient,
   Role,
   StaffPosition,
-} from "../generated/prisma/index.js";
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 

@@ -1,5 +1,5 @@
 import zod from "zod";
-import { Branch, Department } from "../generated/prisma/index.js";
+import { Branch, Department } from "@prisma/client";
 
 const department = zod.enum(["UG", "PG"]);
 const branch = zod.enum(["CSE", "ECE", "ME", "CE", "EE"]);

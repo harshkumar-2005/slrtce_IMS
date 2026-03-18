@@ -1,6 +1,6 @@
 import zod from "zod";
-import { Department } from "../generated/prisma/client.js";
-import { StaffPosition } from "../generated/prisma/client.js";
+import { Department } from "@prisma/client";
+import { StaffPosition } from "@prisma/client";
 
 const staffDataSchema = zod.object({
   department: zod.enum(Department),
