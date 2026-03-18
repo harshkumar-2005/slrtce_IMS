@@ -37,8 +37,27 @@ enum Department {
   ADMINISTRATION
 }
 
+enum Designation {
+  PROFESSOR
+  ASSISTANT_PROFESSOR
+  HOD
+  LECTURER
+}
+
+enum AdminLevel {
+  NORMAL
+  SUPER
+}
+
+enum StaffPosition {
+  CLERK
+  LAB_ASSISTANT
+  LIBRARIAN
+  TECHNICIAN
+}
+
 //
-// MODELS
+// USER (CORE AUTH ENTITY)
 //
 
 model User {
@@ -47,10 +66,11 @@ model User {
   password String
   name     String
   phone    String @unique
-  uid      String @unique
-  branch   Branch
 
   role Role @default(STUDENT)
+
+  isActive        Boolean @default(true)
+  isEmailVerified Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -59,36 +79,91 @@ model User {
   refreshTokens  RefreshToken[]
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
+  adminProfile   AdminProfile?
+  staffProfile   StaffProfile?
+
+  @@index([email])
 }
+
+//
+// STUDENT PROFILE
+//
 
 model StudentProfile {
   id Int @id @default(autoincrement())
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   rollNo     String     @unique
+  branch     Branch
   department Department
   semester   Int
+  year       Int
+  section    String?
 
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([rollNo])
 }
+
+//
+// TEACHER PROFILE
+//
 
 model TeacherProfile {
   id Int @id @default(autoincrement())
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   department  Department
-  designation String?
+  designation Designation
 
   createdAt DateTime @default(now())
 
   @@index([userId])
 }
+
+//
+// ADMIN PROFILE
+//
+
+model AdminProfile {
+  id Int @id @default(autoincrement())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessLevel AdminLevel @default(NORMAL)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+//
+// STAFF PROFILE
+//
+
+model StaffProfile {
+  id Int @id @default(autoincrement())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  department Department
+  position   StaffPosition
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+//
+// AUTH - REFRESH TOKENS
+//
 
 model RefreshToken {
   id        Int      @id @default(autoincrement())
@@ -97,7 +172,14 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
+  // Security enhancements
+  isRevoked       Boolean @default(false)
+  userAgent       String?
+  ipAddress       String?
+  replacedByToken String?
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([token])
 }
