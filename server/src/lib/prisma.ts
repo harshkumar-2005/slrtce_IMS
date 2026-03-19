@@ -20,7 +20,7 @@ const prisma =
 
     return new PrismaClient({
       adapter,
-      log: ["query", "error", "warn"],
+      log: ["error", "warn"],
     });
   })();
 
