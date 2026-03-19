@@ -12,6 +12,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
     studentData,
     teacherData,
     staffData,
+    adminData,
   } = req.body;
   // studentData, teacherData, staffData are optional and depend on the role being created
   // And studentData, teacherData, staffData is a object which are as per prisma.schema file and are required for creating respective profiles.
@@ -30,6 +31,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       studentData,
       teacherData,
       staffData,
+      adminData
     });
 
     res.status(201).json({ message: "User created successfully", user });
