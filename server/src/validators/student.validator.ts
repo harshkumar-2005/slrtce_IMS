@@ -8,8 +8,8 @@ const studentDataSchema = zod.object({
   }),
   uid: zod.string().min(5).max(50).trim(),
   // Use nativeEnum so Zod validates against the Prisma generated list
-  department: zod.nativeEnum(Department),
-  branch: zod.nativeEnum(Branch),
+  department: zod.enum(Department),
+  branch: zod.enum(Branch),
   semester: zod.number().min(1).max(8, "Semester must be between 1 and 8"),
   section: zod
     .string()

@@ -3,12 +3,16 @@ import jsonwebtoken from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import { AuthRequest } from "../types/auth.types.js";
 import { Response } from "express";
+import {Role} from "@prisma/client";
 import prisma from '../lib/prisma.js';
 
-export const loginService = async (validUser: { email: string; password: string }, req: AuthRequest) => {
-  const user = await prisma.user.findUnique({
-    where: { email: validUser.email },
-  });
+export const loginService = async (validUser: { email: string; password: string, role: Role }, req: AuthRequest) => {
+  const user = await prisma.user.findFirst({
+  where: {
+    email: validUser.email,
+    role: validUser.role,
+  },
+});
 
   if (!user) throw new Error("User not found");
 
@@ -28,7 +32,6 @@ export const loginService = async (validUser: { email: string; password: string 
     expiresIn: "7d",
   });
 
-  // Optional: revoke old tokens (single-session)
   await prisma.refreshToken.updateMany({
     where: { userId: user.id, isRevoked: false },
     data: { isRevoked: true },
