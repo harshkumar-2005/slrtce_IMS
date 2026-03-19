@@ -18,7 +18,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
   if (!email || !password || !name || !phone || !role) {
     return res.status(400).json({ message: "All fields are required" });
-  }
+}
 
   try {
     const user = await createUserService({

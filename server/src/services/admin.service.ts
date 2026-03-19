@@ -1,7 +1,5 @@
 import argon2 from "argon2";
-import studentDataSchema, {
-  StudentData,
-} from "../validators/student.validator.js";
+import studentDataSchema from "../validators/student.validator.js";
 import teacherDataSchema from "../validators/teacher.validator.js";
 import staffDataSchema from "../validators/staff.validator.js";
 import adminDataSchema from "../validators/admin.validator.js";
@@ -11,12 +9,10 @@ import {
   Department,
   Designation,
   Prisma,
-  PrismaClient,
   Role,
   StaffPosition,
 } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 type Tx = Prisma.TransactionClient;
 
@@ -35,14 +31,6 @@ const createStudentProfileService = async (
   },
 ) => {
   // Implementation for creating student profile
-  const studentExists = await tx.studentProfile.findUnique({
-    where: { uid: studentData!.uid },
-  });
-
-  if (studentExists) {
-    throw new Error("Student profile with this UID already exists");
-  }
-
   const rollNoExists = await tx.studentProfile.findUnique({
     where: {
       rollNo: studentData!.rollNo,

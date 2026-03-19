@@ -3,8 +3,7 @@ import jsonwebtoken from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import { AuthRequest } from "../types/auth.types.js";
 import { Response } from "express";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 export const loginService = async (validUser: { email: string; password: string }, req: AuthRequest) => {
   const user = await prisma.user.findUnique({
