@@ -178,7 +178,7 @@ model RefreshToken {
   isRevoked       Boolean @default(false)
   userAgent       String?
   ipAddress       String?
-  replacedByToken String?
+  replacedByToken String? @db.VarChar(512)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
