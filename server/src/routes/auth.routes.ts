@@ -4,7 +4,9 @@ import {
   profile,
   resetPassword,
   logout,
-  refreshToken
+  refreshToken,
+  sendEmail,
+  verifyEmail,
 } from "../controllers/auth.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 
@@ -19,5 +21,9 @@ router.patch("/reset-password", authMiddleware, resetPassword);
 router.post("/logout", authMiddleware, logout);
 
 router.post("/refresh-token", refreshToken);
+
+router.post("/email/send", sendEmail);
+
+router.post("/email/verify", verifyEmail);
 
 export default router;
