@@ -248,7 +248,7 @@ export const verifyEmailService = async (userEmail: string, otp: string) => {
     throw new Error("OTP already used");
   }
 
-  const isMatch = await argon2.verify(otpRecord.otp, otp);
+  const isMatch = await verifyOtpHash(otp, otpRecord.otp);
 
   if (!isMatch) {
     throw new Error("Invalid OTP");
