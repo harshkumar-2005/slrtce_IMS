@@ -7,6 +7,8 @@ import {
   resetPasswordService,
   logoutService,
   refreshTokenService,
+  sendEmailService,
+  verifyEmailService,
 } from "../services/auth.service.js";
 
 export const loginRoute = async (req: Request, res: Response) => {
@@ -44,7 +46,7 @@ export const loginRoute = async (req: Request, res: Response) => {
         EmailVerified: user.isEmailVerified,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-      }
+      },
     });
   } catch (err: any) {
     res.status(400).json({
@@ -126,7 +128,6 @@ export const logout = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
 export const refreshToken = async (req: Request, res: Response) => {
   try {
     const token = req.cookies.refreshToken;
@@ -156,6 +157,45 @@ export const refreshToken = async (req: Request, res: Response) => {
     return res.status(401).json({
       success: false,
       message: err.message || "Refresh failed",
+    });
+  }
+};
+
+export const sendEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, role } = req.body;
+
+
+    const isOtpSent = await sendEmailService(email, role);
+    if (isOtpSent) {
+      return res.status(201).json({
+        success: true,
+        message: `OTP is sent successfully to the ${email}`,
+      });
+    }
+  } catch (err: any) {
+    return res.status(401).json({
+      success: false,
+      message: err.message || "Email verification failed",
+    });
+  }
+};
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, otp } = req.body;
+    const isVerified = await verifyEmailService(email, otp);
+
+    if (isVerified) {
+      return res.status(200).json({
+        success: true,
+        message: "Email verified successfully",
+      });
+    }
+  } catch (err: any) {
+    return res.status(401).json({
+      success: false,
+      message: err.message || "Email verification failed",
     });
   }
 };
