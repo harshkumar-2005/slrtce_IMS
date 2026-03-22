@@ -3,16 +3,21 @@ import jsonwebtoken from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import { AuthRequest } from "../types/auth.types.js";
 import { Response } from "express";
-import {Role} from "@prisma/client";
-import prisma from '../lib/prisma.js';
+import { OtpType, Role } from "@prisma/client";
+import prisma from "../lib/prisma.js";
+import nodemailer from "nodemailer";
+import { generateOtp, hashOtp, verifyOtpHash } from "../utils/otp.utils.js";
 
-export const loginService = async (validUser: { email: string; password: string, role: Role }, req: AuthRequest) => {
+export const loginService = async (
+  validUser: { email: string; password: string; role: Role },
+  req: AuthRequest,
+) => {
   const user = await prisma.user.findFirst({
-  where: {
-    email: validUser.email,
-    role: validUser.role,
-  },
-});
+    where: {
+      email: validUser.email,
+      role: validUser.role,
+    },
+  });
 
   if (!user) throw new Error("User not found");
 
@@ -168,7 +173,10 @@ export const refreshTokenService = async (token: string, req: AuthRequest) => {
       token: newRefreshToken,
       userId: decoded.id,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      userAgent: req.headers && typeof req.headers["user-agent"] === "string" ? req.headers["user-agent"] : "unknown",
+      userAgent:
+        req.headers && typeof req.headers["user-agent"] === "string"
+          ? req.headers["user-agent"]
+          : "unknown",
       ipAddress: typeof req.ip === "string" ? req.ip : "unknown",
     },
   });
@@ -177,4 +185,80 @@ export const refreshTokenService = async (token: string, req: AuthRequest) => {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
   };
+};
+
+export const sendEmailService = async (userEmail: string, Userotp: string) => {
+  const otp = generateOtp();
+  const hashedOtp = await hashOtp(otp);
+
+  const userId = await prisma.user.findUnique({
+    where: {
+      email: userEmail,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  await prisma.otp.create({
+    data: {
+      email: userEmail,
+      otp: hashedOtp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      type: OtpType.EMAIL_VERIFICATION,
+      userId: userId?.id,
+    },
+  });
+
+  const mailOptions = {
+    from: envConfig.SMTP_HOST,
+    to: userEmail,
+    subject: "Your OTP Code",
+    text: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
+  };
+
+  const transporter = nodemailer.createTransport({
+    service: envConfig.SMTP_SERVICE,
+    auth: {
+      user: envConfig.SMTP_HOST,
+      pass: envConfig.SMTP_PASSWORD,
+    },
+  });
+
+  await transporter.sendMail(mailOptions);
+
+  return true;
+};
+
+export const verifyEmailService = async (userEmail: string, otp: string) => {
+  const otpRecord = await prisma.otp.findFirst({
+    where: {
+      email: userEmail,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+  });
+
+  if (!otpRecord) {
+    throw new Error("Invalid or expired OTP");
+  }
+
+  if (otpRecord.isUsed == true) {
+    throw new Error("OTP already used");
+  }
+
+  const isMatch = await argon2.verify(otpRecord.otp, otp);
+
+  if (!isMatch) {
+    throw new Error("Invalid OTP");
+  }
+
+  // Mark OTP as used
+  await prisma.otp.update({
+    where: { id: otpRecord.id },
+    data: { isUsed: true },
+  });
+
+  return true;
 };
