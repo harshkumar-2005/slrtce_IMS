@@ -13,48 +13,15 @@ datasource db {
 //
 
 enum Role {
-  ADMIN
-  TEACHER
   STUDENT
+  TEACHER
+  ADMIN
   STAFF
-}
-
-enum Branch {
-  CSE
-  ECS
-  ECE
-  MECH
-  CIVIL
-  EEE
-}
-
-enum Department {
-  COMPUTER_SCIENCE
-  ELECTRONICS
-  MECHANICAL
-  CIVIL
-  ELECTRICAL
-  SCIENCE
-  ADMINISTRATION
-}
-
-enum Designation {
-  PROFESSOR
-  ASSISTANT_PROFESSOR
-  HOD
-  LECTURER
 }
 
 enum AdminLevel {
   NORMAL
   SUPER
-}
-
-enum StaffPosition {
-  CLERK
-  LAB_ASSISTANT
-  LIBRARIAN
-  TECHNICIAN
 }
 
 enum OtpType {
@@ -79,8 +46,9 @@ model User {
   isActive        Boolean @default(true)
   isEmailVerified Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   // Relations
   refreshTokens  RefreshToken[]
@@ -91,6 +59,7 @@ model User {
   otpRecords     Otp[]
 
   @@index([email])
+  @@index([phone])
 }
 
 //
@@ -103,18 +72,28 @@ model StudentProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  uid        String     @unique @db.VarChar(50)
-  rollNo     String     @unique
-  branch     Branch
-  department Department
-  semester   Int
-  year       Int
-  section    String?
+  uid    String @unique @db.VarChar(50)
+  rollNo String @unique
 
-  createdAt DateTime @default(now())
+  branchId           Int
+  departmentId       Int
+  branchDepartmentId Int
 
-  @@index([userId])
-  @@index([rollNo])
+  branchDepartment BranchDepartment @relation(fields: [branchDepartmentId], references: [id])
+  branch           Branch           @relation(fields: [branchId], references: [id])
+  department       Department       @relation(fields: [departmentId], references: [id])
+
+  semester Int
+  year     Int
+  section  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([branchId])
+  @@index([departmentId])
+  @@index([branchDepartmentId])
 }
 
 //
@@ -127,12 +106,18 @@ model TeacherProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  department  Department
-  designation Designation
+  departmentId  Int
+  designationId Int
 
-  createdAt DateTime @default(now())
+  department  Department  @relation(fields: [departmentId], references: [id])
+  designation Designation @relation(fields: [designationId], references: [id])
 
-  @@index([userId])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([departmentId])
+  @@index([designationId])
 }
 
 //
@@ -147,7 +132,9 @@ model AdminProfile {
 
   accessLevel AdminLevel @default(NORMAL)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt @default(now())
+  deletedAt DateTime?
 
   @@index([userId])
 }
@@ -162,12 +149,18 @@ model StaffProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  department Department
-  position   StaffPosition
+  departmentId Int
+  positionId   Int
 
-  createdAt DateTime @default(now())
+  department Department    @relation(fields: [departmentId], references: [id])
+  position   StaffPosition @relation(fields: [positionId], references: [id])
 
-  @@index([userId])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([departmentId])
+  @@index([positionId])
 }
 
 //
@@ -194,6 +187,90 @@ model RefreshToken {
 }
 
 //
+// Branch table 
+//
+
+model Branch {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  code      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  students          StudentProfile[]
+  branchDepartments BranchDepartment[]
+}
+
+//
+// Department table
+//
+
+model Department {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  code      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  students          StudentProfile[]
+  teachers          TeacherProfile[]
+  staff             StaffProfile[]
+  branchDepartments BranchDepartment[]
+}
+
+//
+// BranchDepartment mapping table 
+//
+
+model BranchDepartment {
+  id Int @id @default(autoincrement())
+
+  branchId     Int
+  departmentId Int
+
+  branch          Branch           @relation(fields: [branchId], references: [id])
+  department      Department       @relation(fields: [departmentId], references: [id])
+  studentProfiles StudentProfile[]
+
+  @@unique([branchId, departmentId])
+}
+
+//
+// Designation table
+//
+
+model Designation {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  teachers TeacherProfile[]
+}
+
+//
+// staff position table
+//
+
+model StaffPosition {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  code      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  staff StaffProfile[]
+}
+
+//
 // OTP (One-Time Password) for verification
 //
 
@@ -216,4 +293,5 @@ model Otp {
 
   @@index([email])
   @@index([userId])
+  @@index([email, type])
 }
