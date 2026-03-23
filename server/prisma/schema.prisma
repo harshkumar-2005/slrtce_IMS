@@ -88,7 +88,7 @@ model StudentProfile {
   section  String?
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   @@index([branchId])
@@ -113,7 +113,7 @@ model TeacherProfile {
   designation Designation @relation(fields: [designationId], references: [id])
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   @@index([departmentId])
@@ -133,7 +133,7 @@ model AdminProfile {
   accessLevel AdminLevel @default(NORMAL)
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   @@index([userId])
@@ -156,7 +156,7 @@ model StaffProfile {
   position   StaffPosition @relation(fields: [positionId], references: [id])
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   @@index([departmentId])
@@ -246,9 +246,10 @@ model BranchDepartment {
 model Designation {
   id        Int       @id @default(autoincrement())
   name      String    @unique
+  code      String    @unique
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   teachers TeacherProfile[]
@@ -264,7 +265,7 @@ model StaffPosition {
   code      String    @unique
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
   staff StaffProfile[]
