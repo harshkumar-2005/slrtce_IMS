@@ -166,7 +166,7 @@ export const sendEmail = async (req: Request, res: Response) => {
     const { email, role } = req.body;
 
 
-    const isOtpSent = await sendEmailService(email, role);
+    const isOtpSent = await sendEmailService(email);
     if (isOtpSent) {
       return res.status(201).json({
         success: true,

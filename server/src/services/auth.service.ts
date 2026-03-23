@@ -187,7 +187,7 @@ export const refreshTokenService = async (token: string, req: AuthRequest) => {
   };
 };
 
-export const sendEmailService = async (userEmail: string, Userotp: string) => {
+export const sendEmailService = async (userEmail: string) => {
   const otp = generateOtp();
   const hashedOtp = await hashOtp(otp);
 
