@@ -1,14 +1,14 @@
 import { NextFunction, Response } from "express";
-import { Role } from "@prisma/client";
 import { AuthRequest } from "../types/auth.types.js";
+import { ROLE_VALUES, RoleValue } from "../constants/auth.constants.js";
 import { canManageRole } from "../utils/role.hierarchy.js";
 
-const VALID_ROLES = new Set<Role>(["ADMIN", "TEACHER", "STAFF", "STUDENT"]);
+const VALID_ROLES = new Set<RoleValue>(ROLE_VALUES);
 
 export const canCreateUser = () => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    const actorRole = req.user?.role as Role | undefined;
-    const targetRole = req.body?.role as Role | undefined;
+    const actorRole = req.user?.role as RoleValue | undefined;
+    const targetRole = req.body?.role as RoleValue | undefined;
 
     if (!actorRole) {
       return res.status(401).json({

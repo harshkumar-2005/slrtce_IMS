@@ -2,9 +2,14 @@ import jwt from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../types/auth.types.js";
-import { Role } from "@prisma/client";
+import { ROLE_VALUES, RoleValue } from "../constants/auth.constants.js";
 
-const VALID_ROLES = new Set<Role>(["ADMIN", "TEACHER", "STAFF", "STUDENT"]);
+type JwtPayload = {
+  id: string;
+  role: RoleValue;
+};
+
+const VALID_ROLES = new Set<RoleValue>(ROLE_VALUES);
 
 export default function authMiddleware(
   req: AuthRequest,
@@ -21,17 +26,9 @@ export default function authMiddleware(
       });
     }
 
-    const decoded = jwt.verify(token, envConfig.ACCESS_TOKEN);
+    const decoded = jwt.verify(token, envConfig.ACCESS_TOKEN) as JwtPayload;
 
-    if (
-      !decoded ||
-      typeof decoded !== "object" ||
-      !("id" in decoded) ||
-      !("role" in decoded) ||
-      typeof decoded.id !== "string" ||
-      typeof decoded.role !== "string" ||
-      !VALID_ROLES.has(decoded.role as Role)
-    ) {
+    if (!decoded?.id || !VALID_ROLES.has(decoded.role)) {
       return res.status(401).json({
         success: false,
         message: "Invalid token payload",
@@ -44,7 +41,7 @@ export default function authMiddleware(
     };
 
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({
       success: false,
       message: "Invalid token",

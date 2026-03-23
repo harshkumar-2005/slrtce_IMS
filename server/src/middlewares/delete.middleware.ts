@@ -1,8 +1,8 @@
 import { validate as isUUID } from "uuid";
 import { AuthRequest } from "../types/auth.types.js";
 import { Response, NextFunction } from "express";
-import { Role } from "@prisma/client";
 import prisma from "../lib/prisma.js";
+import { RoleValue } from "../constants/auth.constants.js";
 import { canManageRole } from "../utils/role.hierarchy.js";
 
 export const canDeleteUser = () => {
@@ -27,8 +27,8 @@ export const canDeleteUser = () => {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const actorRole = currentUser.role as Role;
-      const targetRole = targetUser.role;
+      const actorRole = currentUser.role as RoleValue;
+      const targetRole = targetUser.role as RoleValue;
 
       if (!canManageRole(actorRole, targetRole)) {
         return res.status(403).json({

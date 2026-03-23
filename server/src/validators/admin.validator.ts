@@ -1,8 +1,8 @@
 import zod from "zod";
-import { AdminLevel } from "@prisma/client";
+import { ADMIN_LEVEL_VALUES } from "../constants/auth.constants.js";
 
 const adminDataSchema = zod.object({
-    accessLevel: zod.enum(AdminLevel),
+  accessLevel: zod.enum(ADMIN_LEVEL_VALUES),
 });
 
 export default adminDataSchema;

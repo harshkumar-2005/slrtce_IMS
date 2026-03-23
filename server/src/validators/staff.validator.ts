@@ -1,10 +1,11 @@
 import zod from "zod";
-import { Department } from "@prisma/client";
-import { StaffPosition } from "@prisma/client";
 
 const staffDataSchema = zod.object({
-  department: zod.enum(Department),
-  position: zod.enum(StaffPosition),
+  // Department and position as string names/codes
+  department: zod.string().min(1, "Department is required"),
+  position: zod.string().min(1, "Position is required"),
 });
 
 export default staffDataSchema;
+
+export type StaffData = zod.infer<typeof staffDataSchema>;

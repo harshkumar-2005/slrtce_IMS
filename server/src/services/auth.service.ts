@@ -3,13 +3,13 @@ import jsonwebtoken from "jsonwebtoken";
 import envConfig from "../config/env.config.js";
 import { AuthRequest } from "../types/auth.types.js";
 import { Response } from "express";
-import { OtpType, Role } from "@prisma/client";
 import prisma from "../lib/prisma.js";
 import nodemailer from "nodemailer";
 import { generateOtp, hashOtp, verifyOtpHash } from "../utils/otp.utils.js";
+import { RoleValue } from "../constants/auth.constants.js";
 
 export const loginService = async (
-  validUser: { email: string; password: string; role: Role },
+  validUser: { email: string; password: string; role: RoleValue },
   req: AuthRequest,
 ) => {
   const user = await prisma.user.findFirst({
@@ -205,7 +205,7 @@ export const sendEmailService = async (userEmail: string, Userotp: string) => {
       email: userEmail,
       otp: hashedOtp,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
-      type: OtpType.EMAIL_VERIFICATION,
+      type: "EMAIL_VERIFICATION",
       userId: userId?.id,
     },
   });

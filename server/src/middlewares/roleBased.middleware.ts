@@ -1,11 +1,11 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../types/auth.types.js";
-import { Role } from "@prisma/client";
+import { RoleValue } from "../constants/auth.constants.js";
 import { hasAtLeastRole } from "../utils/role.hierarchy.js";
 
-export const authorizeRoles = (...roles: Role[]) => {
+export const authorizeRoles = (...roles: RoleValue[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    const userRole = req.user?.role as Role | undefined;
+    const userRole = req.user?.role as RoleValue | undefined;
 
     if (!userRole) {
       return res.status(401).json({

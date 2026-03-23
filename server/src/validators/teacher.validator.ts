@@ -1,26 +1,11 @@
 import zod from "zod";
 
 const teacherDataSchema = zod.object({
-  department: zod.enum([
-    "COMPUTER_SCIENCE",
-    "ELECTRONICS",
-    "MECHANICAL",
-    "CIVIL",
-    "ELECTRICAL",
-    "SCIENCE",
-    "ADMINISTRATION",
-  ]),
-  designation: zod.enum([
-    "PROFESSOR",
-    "ASSISTANT_PROFESSOR",
-    "HOD",
-    "LECTURER",
-  ]),
+  // Department and designation as string names/codes
+  department: zod.string().min(1, "Department is required"),
+  designation: zod.string().min(1, "Designation is required"),
 });
 
 export default teacherDataSchema;
 
-export type TeacherData = {
-    department: string;
-    designation: string;
-}
+export type TeacherData = zod.infer<typeof teacherDataSchema>;
