@@ -30,6 +30,12 @@ enum OtpType {
   EMAIL_VERIFICATION
 }
 
+enum SubjectType {
+  THEORY
+  PRACTICAL
+  LAB
+}
+
 //
 // USER (CORE AUTH ENTITY)
 //
@@ -111,6 +117,7 @@ model TeacherProfile {
 
   department  Department  @relation(fields: [departmentId], references: [id])
   designation Designation @relation(fields: [designationId], references: [id])
+  teacherSubjects TeacherSubject[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -235,8 +242,65 @@ model BranchDepartment {
   branch          Branch           @relation(fields: [branchId], references: [id])
   department      Department       @relation(fields: [departmentId], references: [id])
   studentProfiles StudentProfile[]
+  subjects        Subject[]
 
   @@unique([branchId, departmentId])
+}
+
+//
+// Subject table
+//
+
+model Subject {
+  id Int @id @default(autoincrement())
+
+  name String
+  code String
+
+  branchDepartmentId Int
+
+  semester Int
+  year     Int
+  credits  Int
+
+  type SubjectType @default(THEORY)
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  branchDepartment BranchDepartment @relation(fields: [branchDepartmentId], references: [id])
+  teacherSubjects TeacherSubject[]
+
+  @@unique([code, branchDepartmentId, semester])
+  @@index([semester, year])
+}
+
+// 
+// Teacher Subject mapping
+// 
+
+model TeacherSubject {
+  id Int @id @default(autoincrement())
+
+  teacherId Int
+  subjectId Int
+
+  semester Int
+  year     Int
+  section  String?
+
+  assignedAt DateTime @default(now())
+
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id])
+  subject Subject        @relation(fields: [subjectId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  deletedAt DateTime?
+
+  @@unique([teacherId, subjectId, semester, year, section])
 }
 
 //
