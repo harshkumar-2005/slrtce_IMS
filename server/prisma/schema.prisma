@@ -36,6 +36,12 @@ enum SubjectType {
   LAB
 }
 
+enum SemesterStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
 //
 // USER (CORE AUTH ENTITY)
 //
@@ -84,14 +90,14 @@ model StudentProfile {
   branchId           Int
   departmentId       Int
   branchDepartmentId Int
+  semesterId         String
 
   branchDepartment BranchDepartment @relation(fields: [branchDepartmentId], references: [id])
   branch           Branch           @relation(fields: [branchId], references: [id])
   department       Department       @relation(fields: [departmentId], references: [id])
+  semester         Semester         @relation(fields: [semesterId], references: [id])
 
-  semester Int
-  year     Int
-  section  String?
+  section String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now()) @updatedAt
@@ -115,8 +121,8 @@ model TeacherProfile {
   departmentId  Int
   designationId Int
 
-  department  Department  @relation(fields: [departmentId], references: [id])
-  designation Designation @relation(fields: [designationId], references: [id])
+  department      Department       @relation(fields: [departmentId], references: [id])
+  designation     Designation      @relation(fields: [designationId], references: [id])
   teacherSubjects TeacherSubject[]
 
   createdAt DateTime  @default(now())
@@ -193,6 +199,48 @@ model RefreshToken {
   @@index([token])
 }
 
+// 
+// academic year
+// 
+
+model AcademicYear {
+  id        String   @id @default(uuid())
+  name      String // "2025-2026"
+  startDate DateTime
+  endDate   DateTime
+
+  semesters Semester[]
+}
+
+// 
+// Semester table
+// 
+
+model Semester {
+  id String @id @default(uuid())
+
+  name   String // "Sem 1"
+  number Int // 1,2,3
+  status SemesterStatus @default(UPCOMING)
+
+  startDate DateTime
+  endDate   DateTime
+
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  branchDepartmentId Int
+  branchDepartment   BranchDepartment @relation(fields: [branchDepartmentId], references: [id])
+
+  isActive Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  studentProfiles StudentProfile[]
+  subjects        Subject[]
+  teacherSubjects TeacherSubject[]
+}
+
 //
 // Branch table 
 //
@@ -243,6 +291,7 @@ model BranchDepartment {
   department      Department       @relation(fields: [departmentId], references: [id])
   studentProfiles StudentProfile[]
   subjects        Subject[]
+  semesters       Semester[]
 
   @@unique([branchId, departmentId])
 }
@@ -258,10 +307,9 @@ model Subject {
   code String
 
   branchDepartmentId Int
+  semesterId         String
 
-  semester Int
-  year     Int
-  credits  Int
+  credits Int
 
   type SubjectType @default(THEORY)
 
@@ -271,10 +319,11 @@ model Subject {
   deletedAt DateTime?
 
   branchDepartment BranchDepartment @relation(fields: [branchDepartmentId], references: [id])
-  teacherSubjects TeacherSubject[]
+  semester         Semester         @relation(fields: [semesterId], references: [id])
+  teacherSubjects  TeacherSubject[]
 
-  @@unique([code, branchDepartmentId, semester])
-  @@index([semester, year])
+  @@unique([code, branchDepartmentId, semesterId])
+  @@index([semesterId])
 }
 
 // 
@@ -284,23 +333,22 @@ model Subject {
 model TeacherSubject {
   id Int @id @default(autoincrement())
 
-  teacherId Int
-  subjectId Int
-
-  semester Int
-  year     Int
-  section  String?
+  teacherId  Int
+  subjectId  Int
+  semesterId String
+  section    String?
 
   assignedAt DateTime @default(now())
 
-  teacher TeacherProfile @relation(fields: [teacherId], references: [id])
-  subject Subject        @relation(fields: [subjectId], references: [id])
+  teacher  TeacherProfile @relation(fields: [teacherId], references: [id])
+  subject  Subject        @relation(fields: [subjectId], references: [id])
+  semester Semester       @relation(fields: [semesterId], references: [id])
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
-  @@unique([teacherId, subjectId, semester, year, section])
+  @@unique([teacherId, subjectId, semesterId, section])
 }
 
 //
