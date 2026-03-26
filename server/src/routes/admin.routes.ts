@@ -3,10 +3,10 @@ import {
   getAllUsers,
   createUser,
   deleteUser,
-  UserById,
+  getUserById,
   createBranch,
   deleteBranch,
-  getAllBranchs,
+  getAllBranches,
   getBranchById,
   createDepartment,
   getAllDepartments,
@@ -20,7 +20,7 @@ import {
   getAllStaff,
   getAllStudents,
   getAllTeachers,
-  getAlladmins,
+  getAllAdmins,
   assignTeacherToSubject,
   deassignTeacherFromSubject,
   getSubjectByTeacherId,
@@ -33,10 +33,10 @@ import { get } from "node:http";
 
 const router = express.Router();
 
-router.get("get/users", authMiddleware, authorizeRoles("ADMIN"), getAllUsers);
+router.get("/users", authMiddleware, authorizeRoles("ADMIN"), getAllUsers);
 
 router.post(
-  "create/users",
+  "/users",
   authMiddleware,
   authorizeRoles("ADMIN"),
   canCreateUser(),
@@ -44,86 +44,86 @@ router.post(
 );
 
 router.get(
-  "/get/admins",
+  "/admins",
   authMiddleware,
   authorizeRoles("ADMIN"),
-  getAlladmins,
+  getAllAdmins,
 );
 
-router.get("/get/staff", authMiddleware, authorizeRoles("ADMIN"), getAllStaff);
+router.get("/staff", authMiddleware, authorizeRoles("ADMIN"), getAllStaff);
 
 router.get(
-  "/get/teachers",
+  "/teachers",
   authMiddleware,
   authorizeRoles("ADMIN"),
   getAllTeachers,
 );
 
 router.get(
-  "/get/students",
+  "/students",
   authMiddleware,
   authorizeRoles("ADMIN"),
   getAllStudents,
 );
 
 router.post(
-  "create/branches",
+  "/branches",
   authMiddleware,
   authorizeRoles("ADMIN"),
   createBranch,
 );
 
 router.get(
-  "get/branches",
+  "/branches",
   authMiddleware,
   authorizeRoles("ADMIN"),
-  getAllBranchs,
+  getAllBranches,
 );
 
 router.post(
-  "create/departments",
+  "/departments",
   authMiddleware,
   authorizeRoles("ADMIN"),
   createDepartment,
 );
 
 router.get(
-  "get/departments",
+  "/departments",
   authMiddleware,
   authorizeRoles("ADMIN"),
   getAllDepartments,
 );
 
 router.post(
-  "create/subjects",
+  "/subjects",
   authMiddleware,
   authorizeRoles("ADMIN", "TEACHER"),
   createSubject,
 );
 
 router.get(
-  "get/subjects",
+  "/subjects",
   authMiddleware,
   authorizeRoles("ADMIN", "TEACHER"),
   getAllSubjects,
 );
 
 router.post(
-  "assign/subjects",
+  "/subjects",
   authMiddleware,
   authorizeRoles("ADMIN"),
   assignTeacherToSubject,
 );
 
 router.post(
-  "deassign/subjects",
+  "/subjects",
   authMiddleware,
   authorizeRoles("ADMIN"),
   deassignTeacherFromSubject,
 );
 
 router.delete(
-  "delete/users/:id",
+  "/users/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   canDeleteUser(),
@@ -131,64 +131,64 @@ router.delete(
 );
 
 router.get(
-  "get/users/:id",
+  "/users/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   canCreateUser(),
-  UserById,
+  getUserById,
 );
 
 router.get(
-  "get/branches/:id",
+  "/branches/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   getBranchById,
 );
 
 router.delete(
-  "delete/branches/:id",
+  "/branches/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   deleteBranch,
 );
 
 router.delete(
-  "delete/departments/:id",
+  "/departments/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   deleteDepartment,
 );
 
 router.get(
-  "get/departments/:id",
+  "/departments/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   getDepartmentById,
 );
 
 router.get(
-  "get/subjects/:id",
+  "/subjects/:id",
   authMiddleware,
   authorizeRoles("ADMIN", "TEACHER"),
   getSubjectById,
 );
 
 router.patch(
-  "/update/subjects/:id",
+  "/subjects/:id",
   authMiddleware,
   authorizeRoles("ADMIN", "TEACHER"),
   updateSubject,
 );
 
 router.delete(
-  "delete/subjects/:id",
+  "/subjects/:id",
   authMiddleware,
   authorizeRoles("ADMIN"),
   deleteSubject,
 );
 
 router.get(
-  "get/subjects/teacher/:teacherId",
+  "/subjects/teacher/:teacherId/:semesterId",
   authMiddleware,
   authorizeRoles("ADMIN", "TEACHER"),
   getSubjectByTeacherId,
