@@ -12,7 +12,6 @@ export const createSubjectService = async (
   type: SubjectType,
   semesterId: string,
 ) => {
-
   const existingSubject = await prisma.subject.findFirst({
     where: {
       name,
@@ -27,18 +26,18 @@ export const createSubjectService = async (
     throw new Error("Subject already exists");
   }
 
-      const Subject = subjectValidation.safeParse({
-        name,
-        code,
-        branchDepartmentId,
-        credits,
-        type,
-        semesterId,
-      });
-  
-      if (!Subject.success) {
-        throw new Error("Invalid subject data");
-      }
+  const Subject = subjectValidation.safeParse({
+    name,
+    code,
+    branchDepartmentId,
+    credits,
+    type,
+    semesterId,
+  });
+
+  if (!Subject.success) {
+    throw new Error("Invalid subject data");
+  }
 
   const subject = await prisma.subject.create({
     data: {
@@ -189,20 +188,14 @@ export const getSubjectsByTeacherIdService = async (
   teacherId: number,
   semesterId: string,
 ) => {
-  const subjectsId = await prisma.teacherSubject.findMany({
+  return await prisma.subject.findMany({
     where: {
-      teacherId,
-      semesterId,
-    },
-  });
-
-  const subjects = await prisma.subject.findMany({
-    where: {
-      id: {
-        in: subjectsId.map((s) => s.subjectId),
+      teacherSubjects: {
+        some: {
+          teacherId: teacherId,
+          semesterId: semesterId,
+        },
       },
     },
   });
-
-  return subjects;
 };
