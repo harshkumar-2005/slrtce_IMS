@@ -20,7 +20,6 @@ const createStudentProfileService = async (
     semester: number;
     branch: string;
     section: string;
-    year: number;
   },
 ) => {
   // Implementation for creating student profile
@@ -73,15 +72,25 @@ const createStudentProfileService = async (
     throw new Error("Branch and Department combination does not exist");
   }
 
+  // Find semester by number
+  const semester = await tx.semester.findFirst({
+    where: {
+      number: parsed.semester,
+    },
+  });
+
+  if (!semester) {
+    throw new Error(`Semester "${parsed.semester}" not found`);
+  }
+
   const student = await tx.studentProfile.create({
     data: {
       rollNo: parsed.rollNo,
       branchId: branch.id,
       departmentId: department.id,
       branchDepartmentId: branchDepartment.id,
-      semester: parsed.semester,
+      semesterId: semester.id,
       section: parsed.section,
-      year: parsed.year,
       uid: parsed.uid,
       userId: userId,
     },
@@ -238,7 +247,6 @@ export const createUserService = async (userData: {
     semester: number;
     branch: string;
     section: string;
-    year: number;
   };
 
   teacherData?: {
