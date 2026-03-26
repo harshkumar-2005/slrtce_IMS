@@ -1,13 +1,45 @@
 import { AuthRequest } from "../types/auth.types.js";
+
 import { Response } from "express";
+
 import { createUserService } from "../services/admin.create.user.service.js";
-import { deleteUserService } from "../services/admin.delete.user.service.js";
+
 import {
   getAllUsersService,
   userByIdSerice,
-} from "../services/admin.get.user.service.js";
+  deleteUserService,
+  getAllAdminService,
+  getAllStaffService,
+  getAllTeachersService,
+  getAllStudentsService,
+} from "../services/admin.user.service.js";
 
-export const allUsers = async (req: AuthRequest, res: Response) => {
+import {
+  createBranchService,
+  getAllBranchService,
+  deleteBranchService,
+  getBranchByIdService,
+} from "../services/branch.service.js";
+
+import {
+  createDepartmentService,
+  getAllDepartmentsService,
+  deleteDepartmentService,
+  getDepartmentByIdService,
+} from "../services/department.service.js";
+
+import {
+  createSubjectService,
+  getAllSubjectsService,
+  getSubjectByIdService,
+  updateSubjectService,
+  deleteSubjectService,
+  assignTeacherToSubjectService,
+  deassignTeacherFromSubjectService,
+  getSubjectsByTeacherIdService,
+} from "../services/subject.service.js";
+
+export const getAllUsers = async (req: AuthRequest, res: Response) => {
   try {
     const {
       page = 1,
@@ -73,24 +105,6 @@ export const createUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = String(req.params.id);
-
-    await deleteUserService(userId);
-
-    return res.status(200).json({
-      success: true,
-      message: "User deleted successfully",
-    });
-  } catch (err: any) {
-    return res.status(500).json({
-      success: false,
-      message: err.message || "Failed to delete user",
-    });
-  }
-};
-
 export const UserById = async (req: AuthRequest, res: Response) => {
   const userId = String(req.params.id);
 
@@ -110,3 +124,492 @@ export const UserById = async (req: AuthRequest, res: Response) => {
       .json({ success: false, message: err.message || "Failed to fetch user" });
   }
 };
+
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = String(req.params.id);
+
+    await deleteUserService(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Failed to delete user",
+    });
+  }
+};
+
+export const getAlladmins = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query as {
+      page?: string;
+      limit?: string;
+      search?: string;
+    };
+    const admins = await getAllAdminService(
+      Number(page),
+      Number(limit),
+      search,
+    );
+
+    res.status(200).json({ success: true, admins });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "Server error" });
+  }
+};
+
+export const getAllStaff = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query as { page?: string; limit?: string; search?: string };
+    const staff = await getAllStaffService(Number(page), Number(limit), search);
+
+    res.status(200).json({ success: true, staff });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "Server error" });
+  }
+};
+
+export const getAllTeachers = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query as {
+      page?: string;
+      limit?: string;
+      search?: string;
+    };
+    const teachers = await getAllTeachersService(
+      Number(page),
+      Number(limit),
+      search,
+    );
+
+    res.status(200).json({ success: true, teachers });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "Server error" });
+  }
+};
+
+export const getAllStudents = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query as {
+      page?: string;
+      limit?: string;
+      search?: string;
+    };
+    const students = await getAllStudentsService(
+      Number(page),
+      Number(limit),
+      search,
+    );
+
+    res.status(200).json({ success: true, students });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "Server error" });
+  }
+};
+
+export const createBranch = async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, code } = req.body;
+
+    if (!name || !code) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and code is required.",
+      });
+    }
+
+    await createBranchService(name, code, true);
+
+    res.status(201).json({
+      success: true,
+      message: "Branch created successfully.",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const getAllBranchs = async (req: AuthRequest, res: Response) => {
+  try {
+    const branches = await getAllBranchService();
+
+    res.status(200).json({
+      success: true,
+      branches,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const getBranchById = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const branch = await getBranchByIdService(Number(id));
+
+    res.status(200).json({
+      success: true,
+      branch,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const deleteBranch = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    await deleteBranchService(Number(id));
+
+    res.status(200).json({
+      success: true,
+      message: "Branch deleted successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const createDepartment = async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, code } = req.body;
+    if (!name || !code) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name and code are required" });
+    }
+    const department = await createDepartmentService(name, code);
+    res.status(201).json({
+      success: true,
+      message: "Department created successfully",
+      department,
+    });
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "Server error" });
+  }
+};
+
+export const getAllDepartments = async (req: AuthRequest, res: Response) => {
+  try {
+    const departments = await getAllDepartmentsService();
+
+    res.status(200).json({
+      success: true,
+      departments,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const getDepartmentById = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const department = await getDepartmentByIdService(Number(id));
+
+    res.status(200).json({
+      success: true,
+      department,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const deleteDepartment = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    await deleteDepartmentService(Number(id));
+
+    res.status(200).json({
+      success: true,
+      message: "Department deleted successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
+  }
+};
+
+export const createSubject = async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, code, branchDepartmentId, credits, type, semesterId } =
+      req.body;
+
+    const subject = await createSubjectService(
+      name,
+      code,
+      branchDepartmentId,
+      credits,
+      type,
+      semesterId,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Subject created successfully",
+      subject,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const getAllSubjects = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+    } = req.query as {
+      page?: string;
+      limit?: string;
+      search?: string;
+    };
+    const subjects = await getAllSubjectsService(
+      Number(page),
+      Number(limit),
+      search,
+    );
+    res.status(200).json({
+      success: true,
+      subjects,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const getSubjectById = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  try {
+    const subject = await getSubjectByIdService(Number(id));
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: "Subject not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      subject,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const updateSubject = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id, name, code, branchDepartmentId, credits, type, semesterId } =
+      req.body;
+
+    if (
+      !id ||
+      !name ||
+      !code ||
+      !branchDepartmentId ||
+      !credits ||
+      !type ||
+      !semesterId
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required for update.",
+      });
+    }
+
+    const subject = await updateSubjectService(
+      Number(id),
+      name,
+      code,
+      branchDepartmentId,
+      credits,
+      type,
+      semesterId,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Subject updated successfully",
+      subject,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const deleteSubject = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject ID is required.",
+      });
+    }
+
+    await deleteSubjectService(Number(id));
+    res.status(200).json({
+      success: true,
+      message: "Subject deleted successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const assignTeacherToSubject = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const { semesterId, subjectId, teacherId, section = "" } = req.body;
+  if (!semesterId || !subjectId || !teacherId) {
+    return res.status(400).json({
+      success: false,
+      message: "semesterId, subjectId and teacherId are required.",
+    });
+  }
+  try {
+    await assignTeacherToSubjectService(
+      semesterId,
+      subjectId,
+      teacherId,
+      section,
+    );
+    res.status(200).json({
+      success: true,
+      message: "Teacher assigned to subject successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const deassignTeacherFromSubject = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const { semesterId, subjectId, teacherId, section = "" } = req.body;
+
+  if (!semesterId || !subjectId || !teacherId) {
+    return res.status(400).json({
+      success: false,
+      message: "semesterId, subjectId and teacherId are required.",
+    });
+  }
+
+  try {
+    await deassignTeacherFromSubjectService(
+      semesterId,
+      subjectId,
+      teacherId,
+      section,
+    );
+    res.status(200).json({
+      success: true,
+      message: "Teacher deassigned from subject successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
+export const getSubjectByTeacherId = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  try {
+    const { teacherId, semesterId } = req.params;
+    const subjects = await getSubjectsByTeacherIdService(
+      Number(teacherId),
+      String(semesterId),
+    );
+    res.status(200).json({
+      success: true,
+      subjects,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error.",
+    });
+  }
+};
+
