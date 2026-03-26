@@ -15,7 +15,6 @@ const studentDataSchema = zod.object({
     .regex(/^[A-Z]$/, {
       message: "Section must be a single uppercase letter",
     }),
-  year: zod.number().min(1).max(4, "Year must be between 1 and 4"),
 });
 
 export default studentDataSchema;
