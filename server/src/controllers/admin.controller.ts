@@ -6,7 +6,7 @@ import { createUserService } from "../services/admin.create.user.service.js";
 
 import {
   getAllUsersService,
-  userByIdSerice,
+  getUserByIdService,
   deleteUserService,
   getAllAdminService,
   getAllStaffService,
@@ -16,7 +16,7 @@ import {
 
 import {
   createBranchService,
-  getAllBranchService,
+  getAllBranchesService,
   deleteBranchService,
   getBranchByIdService,
 } from "../services/branch.service.js";
@@ -105,11 +105,11 @@ export const createUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const UserById = async (req: AuthRequest, res: Response) => {
+export const getUserById = async (req: AuthRequest, res: Response) => {
   const userId = String(req.params.id);
 
   try {
-    const user = await userByIdSerice(userId);
+    const user = await getUserByIdService(userId);
 
     if (!user) {
       return res
@@ -143,7 +143,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAlladmins = async (req: AuthRequest, res: Response) => {
+export const getAllAdmins = async (req: AuthRequest, res: Response) => {
   try {
     const {
       page = 1,
@@ -260,9 +260,9 @@ export const createBranch = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllBranchs = async (req: AuthRequest, res: Response) => {
+export const getAllBranches = async (req: AuthRequest, res: Response) => {
   try {
-    const branches = await getAllBranchService();
+    const branches = await getAllBranchesService();
 
     res.status(200).json({
       success: true,
@@ -389,7 +389,7 @@ export const createSubject = async (req: AuthRequest, res: Response) => {
   try {
     const { name, code, branchDepartmentId, credits, type, semesterId } =
       req.body;
-
+    
     const subject = await createSubjectService(
       name,
       code,
@@ -464,7 +464,8 @@ export const getSubjectById = async (req: AuthRequest, res: Response) => {
 
 export const updateSubject = async (req: AuthRequest, res: Response) => {
   try {
-    const { id, name, code, branchDepartmentId, credits, type, semesterId } =
+    const { id } = req.params;
+    const { name, code, branchDepartmentId, credits, type, semesterId } =
       req.body;
 
     if (
