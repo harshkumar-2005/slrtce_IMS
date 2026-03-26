@@ -63,7 +63,7 @@ export const getAllUsersService = async (
   };
 };
 
-export const userByIdSerice = async (id: string) => {
+export const getUserByIdService = async (id: string) => {
   const user = await prisma.user.findUnique({
     where: { id },
     select: {

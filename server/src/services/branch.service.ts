@@ -10,7 +10,7 @@ export const createBranchService = async (branchName: string, code: string, isAc
     });
 };
 
-export const getAllBranchService = async () => {
+export const getAllBranchesService = async () => {
     return await prisma.branch.findMany();
 }
 

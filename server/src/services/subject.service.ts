@@ -2,6 +2,7 @@ import prisma from "../lib/prisma.js";
 import { SubjectType } from "@prisma/client";
 import pagination from "../utils/pagination.utils.js";
 import { Prisma } from "@prisma/client";
+import subjectValidation from "../validators/subject.validator.js";
 
 export const createSubjectService = async (
   name: string,
@@ -11,6 +12,34 @@ export const createSubjectService = async (
   type: SubjectType,
   semesterId: string,
 ) => {
+
+  const existingSubject = await prisma.subject.findFirst({
+    where: {
+      name,
+      code,
+      branchDepartmentId,
+      type,
+      semesterId,
+    },
+  });
+
+  if (existingSubject) {
+    throw new Error("Subject already exists");
+  }
+
+      const Subject = subjectValidation.safeParse({
+        name,
+        code,
+        branchDepartmentId,
+        credits,
+        type,
+        semesterId,
+      });
+  
+      if (!Subject.success) {
+        throw new Error("Invalid subject data");
+      }
+
   const subject = await prisma.subject.create({
     data: {
       branchDepartmentId,
@@ -113,9 +142,13 @@ export const updateSubjectService = async (
 };
 
 export const deleteSubjectService = async (id: number) => {
-  await prisma.subject.delete({
+  await prisma.subject.update({
     where: {
       id,
+    },
+    data: {
+      isActive: false,
+      deletedAt: new Date(),
     },
   });
 };
