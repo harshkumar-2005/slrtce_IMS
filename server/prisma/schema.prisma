@@ -286,6 +286,11 @@ model BranchDepartment {
 
   branchId     Int
   departmentId Int
+  isActive     Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
 
   branch          Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
   department      Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
