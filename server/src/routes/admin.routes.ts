@@ -12,6 +12,11 @@ import {
   getAllDepartments,
   deleteDepartment,
   getDepartmentById,
+  createBranchDepartment,
+  getAllBranchDepartments,
+  getBranchDepartmentById,
+  updateBranchDepartment,
+  deleteBranchDepartment,
   createSubject,
   getAllSubjects,
   getSubjectById,
@@ -29,7 +34,6 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/roleBased.middleware.js";
 import { canCreateUser } from "../middlewares/create.middleware.js";
 import { canDeleteUser } from "../middlewares/delete.middleware.js";
-import { get } from "node:http";
 
 const router = express.Router();
 
@@ -43,12 +47,7 @@ router.post(
   createUser,
 );
 
-router.get(
-  "/admins",
-  authMiddleware,
-  authorizeRoles("ADMIN"),
-  getAllAdmins,
-);
+router.get("/admins", authMiddleware, authorizeRoles("ADMIN"), getAllAdmins);
 
 router.get("/staff", authMiddleware, authorizeRoles("ADMIN"), getAllStaff);
 
@@ -66,12 +65,7 @@ router.get(
   getAllStudents,
 );
 
-router.post(
-  "/branches",
-  authMiddleware,
-  authorizeRoles("ADMIN"),
-  createBranch,
-);
+router.post("/branches", authMiddleware, authorizeRoles("ADMIN"), createBranch);
 
 router.get(
   "/branches",
@@ -120,6 +114,41 @@ router.post(
   authMiddleware,
   authorizeRoles("ADMIN"),
   deassignTeacherFromSubject,
+);
+
+router.get(
+  "/branch-departments",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  getAllBranchDepartments,
+);
+
+router.post(
+  "/branch-departments",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  createBranchDepartment,
+);
+
+router.get(
+  "/branch-departments/:id",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  getBranchDepartmentById,
+);
+
+router.put(
+  "/branch-departments/:id",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  updateBranchDepartment,
+)
+
+router.delete(
+  "/branch-departments/:id",
+  authMiddleware,
+  authorizeRoles("ADMIN"),
+  deleteBranchDepartment,
 );
 
 router.delete(
