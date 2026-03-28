@@ -39,6 +39,14 @@ import {
   getSubjectsByTeacherIdService,
 } from "../services/subject.service.js";
 
+import {
+  createBranchDepartmentMapping,
+  getAllBranchDepartmentMappings,
+  getBranchDepartmentByIdMapping,
+  deleteBranchDepartmentMapping,
+  updateBranchDepartmentMapping,
+} from "../services/map.branch.department.service.js";
+
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
   try {
     const {
@@ -385,11 +393,133 @@ export const deleteDepartment = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const createBranchDepartment = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  try {
+    const { branchId, departmentId } = req.body;
+
+    const mapping = await createBranchDepartmentMapping(branchId, departmentId);
+    res.status(201).json({
+      success: true,
+      mapping,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
+  }
+};
+
+export const getAllBranchDepartments = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const {
+    page = 1,
+    limit = 10,
+    search = "",
+  } = req.query as { page?: string; limit?: string; search?: string };
+  try {
+    const result = await getAllBranchDepartmentMappings(
+      Number(page),
+      Number(limit),
+      search,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      meta: {
+        page,
+        limit,
+        totalPages: result.totalPages,
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
+  }
+};
+
+export const getBranchDepartmentById = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const { id } = req.params;
+  try {
+    const data = await getBranchDepartmentByIdMapping(Number(id));
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        message: "Branch-Department mapping not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      mappings: data,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
+  }
+};
+
+export const updateBranchDepartment = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const { id } = req.params;
+  const { branchId, departmentId } = req.body;
+
+  try {
+    const mapping = await updateBranchDepartmentMapping(
+      Number(id),
+      branchId,
+      departmentId,
+    );
+    res.status(200).json({
+      success: true,
+      mapping,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
+  }
+};
+
+export const deleteBranchDepartment = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const { id } = req.params;
+  try {
+    await deleteBranchDepartmentMapping(Number(id));
+    res.status(200).json({
+      success: true,
+      message: "Branch-Department mapping deleted successfully",
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
+  }
+};
+
 export const createSubject = async (req: AuthRequest, res: Response) => {
   try {
     const { name, code, branchDepartmentId, credits, type, semesterId } =
       req.body;
-    
+
     const subject = await createSubjectService(
       name,
       code,
