@@ -42,6 +42,13 @@ enum SemesterStatus {
   COMPLETED
 }
 
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
 //
 // USER (CORE AUTH ENTITY)
 //
@@ -99,9 +106,10 @@ model StudentProfile {
 
   section String?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  deletedAt DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  deletedAt         DateTime?
+  attendanceRecords AttendanceRecord[]
 
   @@index([branchId])
   @@index([departmentId])
@@ -125,9 +133,11 @@ model TeacherProfile {
   designation     Designation      @relation(fields: [designationId], references: [id], onDelete: Cascade)
   teacherSubjects TeacherSubject[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  deletedAt DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  deletedAt          DateTime?
+  attendanceSessions AttendanceSession[]
+  attendanceRecords  AttendanceRecord[]
 
   @@index([departmentId])
   @@index([designationId])
@@ -236,9 +246,10 @@ model Semester {
 
   createdAt DateTime @default(now())
 
-  studentProfiles StudentProfile[]
-  subjects        Subject[]
-  teacherSubjects TeacherSubject[]
+  studentProfiles    StudentProfile[]
+  subjects           Subject[]
+  teacherSubjects    TeacherSubject[]
+  attendanceSessions AttendanceSession[]
 }
 
 //
@@ -292,11 +303,12 @@ model BranchDepartment {
   updatedAt DateTime  @default(now()) @updatedAt
   deletedAt DateTime?
 
-  branch          Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  department      Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  studentProfiles StudentProfile[]
-  subjects        Subject[]
-  semesters       Semester[]
+  branch             Branch              @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  department         Department          @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  studentProfiles    StudentProfile[]
+  subjects           Subject[]
+  semesters          Semester[]
+  attendanceSessions AttendanceSession[]
 
   @@unique([branchId, departmentId])
 }
@@ -323,9 +335,10 @@ model Subject {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  branchDepartment BranchDepartment @relation(fields: [branchDepartmentId], references: [id], onDelete: Cascade)
-  semester         Semester         @relation(fields: [semesterId], references: [id], onDelete: Cascade)
-  teacherSubjects  TeacherSubject[]
+  branchDepartment   BranchDepartment    @relation(fields: [branchDepartmentId], references: [id], onDelete: Cascade)
+  semester           Semester            @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  teacherSubjects    TeacherSubject[]
+  attendanceSessions AttendanceSession[]
 
   @@unique([code, branchDepartmentId, semesterId])
   @@index([semesterId])
@@ -412,4 +425,64 @@ model Otp {
   @@index([email])
   @@index([userId])
   @@index([email, type])
+}
+
+// 
+// Attendance Record table
+// 
+
+model AttendanceRecord {
+  id String @id @default(uuid())
+
+  sessionId String
+  studentId Int
+
+  status AttendanceStatus @default(ABSENT)
+
+  markedAt DateTime @default(now())
+
+  // who marked attendance
+  markedBy Int
+
+  markedByTeacher TeacherProfile    @relation(fields: [markedBy], references: [id])
+  session         AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student         StudentProfile    @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId]) // prevent duplicates
+  @@index([studentId])
+}
+
+// 
+// Attendance Session table
+// 
+
+model AttendanceSession {
+  id String @id @default(uuid())
+
+  subjectId          Int
+  semesterId         String
+  teacherId          Int
+  branchDepartmentId Int
+
+  section String?
+
+  date      DateTime
+  startTime DateTime?
+  endTime   DateTime?
+
+  topic String?
+
+  createdAt DateTime @default(now())
+
+  subject          Subject          @relation(fields: [subjectId], references: [id])
+  semester         Semester         @relation(fields: [semesterId], references: [id])
+  teacher          TeacherProfile   @relation(fields: [teacherId], references: [id])
+  branchDepartment BranchDepartment @relation(fields: [branchDepartmentId], references: [id])
+
+  records AttendanceRecord[]
+
+  @@unique([subjectId, semesterId, teacherId, date, startTime])
+  @@index([subjectId, semesterId])
+  @@index([teacherId])
+  @@index([date])
 }
