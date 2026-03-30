@@ -460,6 +460,7 @@ model AttendanceSession {
   id String @id @default(uuid())
 
   subjectId          Int
+  subjectType        SubjectType
   semesterId         String
   teacherId          Int
   branchDepartmentId Int
@@ -467,8 +468,15 @@ model AttendanceSession {
   section String?
 
   date      DateTime
-  startTime DateTime?
-  endTime   DateTime?
+  startTime DateTime
+  endTime   DateTime
+
+  graceMinutes Int       @default(10)
+  autoLockAt   DateTime
+  isLocked     Boolean   @default(false)
+  lockedAt     DateTime?
+  lockReason   String?
+  isBackfill   Boolean   @default(false)
 
   topic String?
 
@@ -481,7 +489,9 @@ model AttendanceSession {
 
   records AttendanceRecord[]
 
-  @@unique([subjectId, semesterId, teacherId, date, startTime])
+  @@unique([teacherId, subjectId, date, startTime, section])
+  @@index([teacherId, date, startTime, endTime])
+  @@index([teacherId, isLocked, autoLockAt])
   @@index([subjectId, semesterId])
   @@index([teacherId])
   @@index([date])
