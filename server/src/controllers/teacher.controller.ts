@@ -1,3 +1,5 @@
+// Functionality likes getAllStudents, getAllBranches, getAllDepartments, getAllSubjects, etc. are handled in admin.controller.ts with appropriate role checks since teachers also need access to those endpoints.
+
 import { AuthRequest } from "../types/auth.types.js";
 import { Response } from "express";
 import {

@@ -28,7 +28,7 @@ import {
   getAllAdmins,
   assignTeacherToSubject,
   deassignTeacherFromSubject,
-  getSubjectByTeacherId,
+  getSubjectByTeacherId // used for getting subjects assigned to a teacher for a specific semester,
 } from "../controllers/admin.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/roleBased.middleware.js";
@@ -61,7 +61,7 @@ router.get(
 router.get(
   "/students",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getAllStudents,
 );
 
@@ -70,7 +70,7 @@ router.post("/branches", authMiddleware, authorizeRoles("ADMIN"), createBranch);
 router.get(
   "/branches",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getAllBranches,
 );
 
@@ -84,7 +84,7 @@ router.post(
 router.get(
   "/departments",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getAllDepartments,
 );
 
@@ -119,7 +119,7 @@ router.post(
 router.get(
   "/branch-departments",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getAllBranchDepartments,
 );
 
@@ -133,7 +133,7 @@ router.post(
 router.get(
   "/branch-departments/:id",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getBranchDepartmentById,
 );
 
@@ -142,7 +142,7 @@ router.put(
   authMiddleware,
   authorizeRoles("ADMIN"),
   updateBranchDepartment,
-)
+);
 
 router.delete(
   "/branch-departments/:id",
@@ -170,7 +170,7 @@ router.get(
 router.get(
   "/branches/:id",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getBranchById,
 );
 
@@ -191,7 +191,7 @@ router.delete(
 router.get(
   "/departments/:id",
   authMiddleware,
-  authorizeRoles("ADMIN"),
+  authorizeRoles("ADMIN", "TEACHER"),
   getDepartmentById,
 );
 
