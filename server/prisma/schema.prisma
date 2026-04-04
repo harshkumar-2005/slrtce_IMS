@@ -49,6 +49,12 @@ enum AttendanceStatus {
   EXCUSED
 }
 
+enum SubmissionStatus {
+  SUBMITTED
+  LATE
+  GRADED
+}
+
 //
 // USER (CORE AUTH ENTITY)
 //
@@ -110,6 +116,7 @@ model StudentProfile {
   updatedAt         DateTime           @default(now()) @updatedAt
   deletedAt         DateTime?
   attendanceRecords AttendanceRecord[]
+  submissions       Submission[]
 
   @@index([branchId])
   @@index([departmentId])
@@ -138,6 +145,8 @@ model TeacherProfile {
   deletedAt          DateTime?
   attendanceSessions AttendanceSession[]
   attendanceRecords  AttendanceRecord[]
+  assignments        Assignment[]
+  studyMaterials     StudyMaterial[]
 
   @@index([departmentId])
   @@index([designationId])
@@ -339,6 +348,8 @@ model Subject {
   semester           Semester            @relation(fields: [semesterId], references: [id], onDelete: Cascade)
   teacherSubjects    TeacherSubject[]
   attendanceSessions AttendanceSession[]
+  assignments        Assignment[]
+  studyMaterials     StudyMaterial[]
 
   @@unique([code, branchDepartmentId, semesterId])
   @@index([semesterId])
@@ -495,4 +506,78 @@ model AttendanceSession {
   @@index([subjectId, semesterId])
   @@index([teacherId])
   @@index([date])
+}
+
+model Assignment {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  subjectId   Int
+  teacherId   Int
+
+  dueDate  DateTime
+  maxMarks Int
+
+  attachments Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subject                Subject                @relation(fields: [subjectId], references: [id])
+  teacher                TeacherProfile         @relation(fields: [teacherId], references: [id])
+  submissions            Submission[]
+  assignmentVisibilities AssignmentVisibility[]
+}
+
+model Submission {
+  id           String @id @default(uuid())
+  assignmentId String
+  studentId    Int
+
+  content     String
+  attachments Json?
+
+  submittedAt DateTime @default(now())
+
+  marks    Int?
+  feedback String?
+
+  status SubmissionStatus @default(SUBMITTED)
+
+  assignment Assignment     @relation(fields: [assignmentId], references: [id])
+  student    StudentProfile @relation(fields: [studentId], references: [id])
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+}
+
+model AssignmentVisibility {
+  id           String @id @default(uuid())
+  assignmentId String
+
+  branchId     Int?
+  departmentId Int?
+  semesterId   String?
+  section      String?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+}
+
+model StudyMaterial {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+
+  subjectId Int
+  teacherId Int
+
+  fileUrl  String
+  fileType String // PDF, PPT, DOC
+  fileSize Int? // optional
+
+  uploadedAt DateTime @default(now())
+
+  subject Subject        @relation(fields: [subjectId], references: [id])
+  teacher TeacherProfile @relation(fields: [teacherId], references: [id])
 }
