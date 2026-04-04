@@ -9,6 +9,15 @@ import {
   lockSession,
   markAttendance,
   getAttendanceBySessionId,
+  createMaterial,
+  getMaterial,
+  deleteMaterial,
+  createAssignment,
+  deleteAssignment,
+  viewSubmission,
+  gradeSubmission,
+  uploadMarks,
+  updateMarks,
 } from "../controllers/teacher.controller.js";
 
 const router = express.Router();
@@ -60,6 +69,69 @@ router.get(
   authMiddleware,
   authorizeRoles("TEACHER", "ADMIN", "STAFF", "STUDENT"),
   getAttendanceByStudent,
+);
+
+router.post(
+  "/materials",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  createMaterial,
+);
+
+router.get(
+  "/materials/:subjectId",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN", "STAFF", "STUDENT"),
+  getMaterial,
+);
+
+router.delete(
+  "/materials/:materialId",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  deleteMaterial,
+)
+
+router.post(
+  "/assignments",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  createAssignment,
+);
+
+router.delete(
+  "/assignments/:assignmentId",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  deleteAssignment,
+);
+
+router.get(
+  "/assignments/:assignmentId/submissions",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  viewSubmission,
+);
+
+router.post(
+  "/assignments/:assignmentId/submissions/:submissionId/grade",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  gradeSubmission,
+);
+
+router.post(
+  "/upload-marks",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  uploadMarks,
+);
+
+router.put(
+  "/assignments/:assignmentId/submissions/:submissionId/marks",
+  authMiddleware,
+  authorizeRoles("TEACHER", "ADMIN"),
+  updateMarks,
 );
 
 export default router;
